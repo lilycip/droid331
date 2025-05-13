@@ -90,7 +90,9 @@ modules:
   management:
     enabled: true
     process: sequential
-    config_path: config/management.yaml
+    default_model: llama-3.1
+    teams_path: data/teams
+    tools_path: data/tools
 
 memory:
   path: data/memory
@@ -119,9 +121,9 @@ tasks:
       schedule: "0 9 * * *"  # Every day at 9 AM
       priority: 3
       
-    - name: run_social_media_crew
+    - name: run_social_media_team
       params:
-        crew_type: social_media
+        team_type: social_media
         topic: trending_tech
         platform: twitter
       schedule: "0 10 * * *"  # Every day at 10 AM
@@ -138,4 +140,3 @@ logging:
     droid.core: INFO
     droid.modules: INFO
     droid.modules.management: INFO
-    crewai: INFO

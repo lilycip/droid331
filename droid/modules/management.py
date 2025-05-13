@@ -27,9 +27,200 @@ class Tool:
         """Run the tool."""
         return self.func(*args, **kwargs)
 
+class Agent:
+    """Agent class for the Management module."""
+    
+    def __init__(self, name: str, role: str, goal: str, backstory: str = None, 
+                 tools: List[Tool] = None, model=None):
+        """
+        Initialize an agent.
+        
+        Args:
+            name: Unique identifier for the agent
+            role: Role of the agent
+            goal: Goal of the agent
+            backstory: Backstory of the agent
+            tools: List of tools available to the agent
+            model: Language model to use for the agent
+        """
+        self.id = str(uuid.uuid4())
+        self.name = name
+        self.role = role
+        self.goal = goal
+        self.backstory = backstory or f"You are an AI agent named {name} with the role of {role}."
+        self.tools = tools or []
+        self.model = model
+        self.memory = []
+        
+    def add_memory(self, content: str) -> None:
+        """Add a memory item to the agent's memory."""
+        self.memory.append({
+            "content": content,
+            "timestamp": datetime.now().isoformat()
+        })
+        
+    def get_prompt(self, task_description: str, context: List[str] = None) -> str:
+        """Generate a prompt for the agent based on its role, goal, and the task."""
+        memories = "\n".join([f"- {m['content']}" for m in self.memory[-5:]])
+        context_str = "\n".join(context) if context else ""
+        
+        prompt = f"""
+        # Agent: {self.name}
+        ## Role: {self.role}
+        ## Goal: {self.goal}
+        ## Backstory: {self.backstory}
+        
+        ## Task Description:
+        {task_description}
+        
+        ## Context:
+        {context_str}
+        
+        ## Recent Memories:
+        {memories}
+        
+        ## Available Tools:
+        """
+        
+        for tool in self.tools:
+            prompt += f"- {tool.name}: {tool.description}\n"
+            
+        prompt += "\nPlease complete the task based on your role and goal. Be thorough and creative."
+        
+        return prompt
+        
+    def execute_task(self, task_description: str, context: List[str] = None) -> str:
+        """Execute a task using the agent's model."""
+        prompt = self.get_prompt(task_description, context)
+        
+        if self.model:
+            response = self.model.generate(prompt)
+            self.add_memory(f"Completed task: {task_description}")
+            return response
+        else:
+            return f"[Agent {self.name} has no model assigned. Cannot execute task.]"
+
+
+class Task:
+    """Task class for the Management module."""
+    
+    def __init__(self, name: str, description: str, agent: Agent, 
+                 expected_output: str = None, context: List[str] = None):
+        """
+        Initialize a task.
+        
+        Args:
+            name: Unique identifier for the task
+            description: Description of the task
+            agent: Agent assigned to the task
+            expected_output: Expected output format
+            context: Additional context for the task
+        """
+        self.id = str(uuid.uuid4())
+        self.name = name
+        self.description = description
+        self.agent = agent
+        self.expected_output = expected_output
+        self.context = context or []
+        self.status = "pending"  # pending, in_progress, completed, failed
+        self.result = None
+        self.created_at = datetime.now().isoformat()
+        self.completed_at = None
+        
+    def execute(self) -> str:
+        """Execute the task using the assigned agent."""
+        try:
+            self.status = "in_progress"
+            self.result = self.agent.execute_task(self.description, self.context)
+            self.status = "completed"
+            self.completed_at = datetime.now().isoformat()
+            return self.result
+        except Exception as e:
+            self.status = "failed"
+            self.result = f"Error: {str(e)}"
+            return self.result
+
+
+class Team:
+    """Team class for the Management module (equivalent to Crew in CrewAI)."""
+    
+    def __init__(self, name: str, agents: List[Agent], tasks: List[Task], 
+                 process_type: str = "sequential"):
+        """
+        Initialize a team.
+        
+        Args:
+            name: Unique identifier for the team
+            agents: List of agents in the team
+            tasks: List of tasks assigned to the team
+            process_type: Process type (sequential or hierarchical)
+        """
+        self.id = str(uuid.uuid4())
+        self.name = name
+        self.agents = agents
+        self.tasks = tasks
+        self.process_type = process_type
+        self.results = {}
+        self.status = "pending"  # pending, in_progress, completed, failed
+        
+    def run(self, inputs: Dict[str, Any] = None) -> Dict[str, Any]:
+        """
+        Run the team's tasks.
+        
+        Args:
+            inputs: Input parameters for the tasks
+            
+        Returns:
+            Results of the team execution
+        """
+        self.status = "in_progress"
+        results = {}
+        
+        # Add inputs to context for all tasks if provided
+        if inputs:
+            input_context = [f"{k}: {v}" for k, v in inputs.items()]
+            for task in self.tasks:
+                task.context.extend(input_context)
+        
+        if self.process_type == "sequential":
+            # Run tasks in sequence, passing results to next task
+            for i, task in enumerate(self.tasks):
+                # Add results from previous tasks to context
+                if i > 0:
+                    prev_results = [f"Result from {prev_task.name}: {prev_task.result}" 
+                                   for prev_task in self.tasks[:i] if prev_task.result]
+                    task.context.extend(prev_results)
+                
+                result = task.execute()
+                results[task.name] = result
+                
+        elif self.process_type == "hierarchical":
+            # First task is the manager that delegates to other agents
+            manager_task = self.tasks[0]
+            manager_result = manager_task.execute()
+            results[manager_task.name] = manager_result
+            
+            # Parse manager result to get instructions for other tasks
+            # This is a simplified implementation
+            for task in self.tasks[1:]:
+                task.context.append(f"Manager instructions: {manager_result}")
+                result = task.execute()
+                results[task.name] = result
+                
+        else:
+            # Default to parallel execution (simplified)
+            for task in self.tasks:
+                result = task.execute()
+                results[task.name] = result
+        
+        self.results = results
+        self.status = "completed"
+        return results
+
+
 class Management:
     """
-    Management module for team coordination and task delegation using CrewAI.
+    Management module for team coordination and task delegation.
     """
     
     def __init__(self, config: Dict[str, Any], model_manager: ModelManager, memory: MemorySystem):
@@ -46,17 +237,17 @@ class Management:
         self.memory = memory
         self.agents = {}
         self.tasks = {}
-        self.crews = {}
+        self.teams = {}
         self.tools = {}
         
         # Default process type
-        self.default_process = Process.SEQUENTIAL
+        self.default_process = "sequential"
         if self.config.get("process") == "hierarchical":
-            self.default_process = Process.HIERARCHICAL
+            self.default_process = "hierarchical"
         
         logger.info("Management module initialized")
     
-    def register_tool(self, name: str, description: str, func: callable) -> None:
+    def register_tool(self, name: str, description: str, func: Callable) -> None:
         """
         Register a custom tool for agents to use.
         
@@ -65,31 +256,28 @@ class Management:
             description: Description of the tool
             func: Function to execute when the tool is used
         """
-        self.tools[name] = CustomTool(name=name, description=description, func=func)
+        self.tools[name] = Tool(name=name, description=description, func=func)
         logger.info(f"Registered tool: {name}")
     
     def create_agent(self, name: str, role: str, goal: str, backstory: str = None, 
-                     verbose: bool = False, allow_delegation: bool = False,
                      tools: List[str] = None) -> str:
         """
-        Create a CrewAI agent.
+        Create an agent.
         
         Args:
             name: Unique identifier for the agent
             role: Role of the agent
             goal: Goal of the agent
             backstory: Backstory of the agent
-            verbose: Whether to enable verbose output
-            allow_delegation: Whether to allow task delegation
             tools: List of tool names to assign to the agent
             
         Returns:
             The agent ID (same as name)
         """
         # Get the LLM from model manager if available
-        llm = None
+        model = None
         if self.model_manager.has_model("llm"):
-            llm = self.model_manager.get_model("llm")
+            model = self.model_manager.get_model("llm")
         
         # Get the tools for this agent
         agent_tools = []
@@ -99,14 +287,13 @@ class Management:
                     agent_tools.append(self.tools[tool_name])
         
         # Create the agent
-        agent = CrewAgent(
+        agent = Agent(
+            name=name,
             role=role,
             goal=goal,
-            backstory=backstory or f"You are an AI agent named {name} with the role of {role}.",
-            verbose=verbose,
-            allow_delegation=allow_delegation,
-            tools=agent_tools if agent_tools else None,
-            llm=llm
+            backstory=backstory,
+            tools=agent_tools,
+            model=model
         )
         
         self.agents[name] = agent
@@ -117,7 +304,7 @@ class Management:
     def create_task(self, name: str, description: str, agent_name: str, 
                    expected_output: str = None, context: List[str] = None) -> str:
         """
-        Create a CrewAI task.
+        Create a task.
         
         Args:
             name: Unique identifier for the task
@@ -132,10 +319,11 @@ class Management:
         if agent_name not in self.agents:
             raise ValueError(f"Agent {agent_name} does not exist")
         
-        task = CrewTask(
+        task = Task(
+            name=name,
             description=description,
-            expected_output=expected_output,
             agent=self.agents[agent_name],
+            expected_output=expected_output,
             context=context
         )
         
@@ -144,20 +332,17 @@ class Management:
         
         return name
     
-    def create_crew(self, name: str, task_names: List[str], process: str = None, 
-                   verbose: bool = True, memory: bool = True) -> str:
+    def create_team(self, name: str, task_names: List[str], process: str = None) -> str:
         """
-        Create a CrewAI crew with tasks.
+        Create a team with tasks.
         
         Args:
-            name: Unique identifier for the crew
-            task_names: List of task names to assign to the crew
+            name: Unique identifier for the team
+            task_names: List of task names to assign to the team
             process: Process type (sequential or hierarchical)
-            verbose: Whether to enable verbose output
-            memory: Whether to enable memory
             
         Returns:
-            The crew ID (same as name)
+            The team ID (same as name)
         """
         # Validate tasks
         tasks = []
@@ -168,57 +353,60 @@ class Management:
         
         # Determine process type
         process_type = self.default_process
-        if process == "sequential":
-            process_type = Process.SEQUENTIAL
-        elif process == "hierarchical":
-            process_type = Process.HIERARCHICAL
+        if process:
+            process_type = process
         
-        # Create the crew
-        crew = Crew(
-            agents=[self.agents[task.agent.role.replace(" ", "_")] for task in tasks],
+        # Get unique agents from tasks
+        agents = []
+        for task in tasks:
+            if task.agent not in agents:
+                agents.append(task.agent)
+        
+        # Create the team
+        team = Team(
+            name=name,
+            agents=agents,
             tasks=tasks,
-            verbose=verbose,
-            process=process_type,
-            memory=memory
+            process_type=process_type
         )
         
-        self.crews[name] = crew
-        logger.info(f"Created crew: {name} with {len(tasks)} tasks")
+        self.teams[name] = team
+        logger.info(f"Created team: {name} with {len(tasks)} tasks")
         
         return name
     
-    def run_crew(self, name: str, inputs: Dict[str, Any] = None) -> Dict[str, Any]:
+    def run_team(self, name: str, inputs: Dict[str, Any] = None) -> Dict[str, Any]:
         """
-        Run a CrewAI crew.
+        Run a team.
         
         Args:
-            name: Name of the crew to run
-            inputs: Input parameters for the crew
+            name: Name of the team to run
+            inputs: Input parameters for the team
             
         Returns:
-            Results of the crew execution
+            Results of the team execution
         """
-        if name not in self.crews:
-            raise ValueError(f"Crew {name} does not exist")
+        if name not in self.teams:
+            raise ValueError(f"Team {name} does not exist")
         
-        crew = self.crews[name]
+        team = self.teams[name]
         
-        # Run the crew
-        logger.info(f"Running crew: {name}")
-        result = crew.kickoff(inputs=inputs)
+        # Run the team
+        logger.info(f"Running team: {name}")
+        results = team.run(inputs=inputs)
         
         # Store the result in memory
-        self.memory.add(f"crew_result_{name}", {
-            "crew": name,
-            "result": result,
-            "timestamp": self.memory.get_timestamp()
+        self.memory.add(f"team_result_{name}", {
+            "team": name,
+            "results": results,
+            "timestamp": datetime.now().isoformat()
         })
         
-        return {"result": result}
+        return {"results": results}
     
-    def get_agent(self, name: str) -> Optional[CrewAgent]:
+    def get_agent(self, name: str) -> Optional[Agent]:
         """
-        Get a CrewAI agent by name.
+        Get an agent by name.
         
         Args:
             name: Name of the agent
@@ -228,9 +416,9 @@ class Management:
         """
         return self.agents.get(name)
     
-    def get_task(self, name: str) -> Optional[CrewTask]:
+    def get_task(self, name: str) -> Optional[Task]:
         """
-        Get a CrewAI task by name.
+        Get a task by name.
         
         Args:
             name: Name of the task
@@ -240,17 +428,17 @@ class Management:
         """
         return self.tasks.get(name)
     
-    def get_crew(self, name: str) -> Optional[Crew]:
+    def get_team(self, name: str) -> Optional[Team]:
         """
-        Get a CrewAI crew by name.
+        Get a team by name.
         
         Args:
-            name: Name of the crew
+            name: Name of the team
             
         Returns:
-            The crew or None if not found
+            The team or None if not found
         """
-        return self.crews.get(name)
+        return self.teams.get(name)
     
     def list_agents(self) -> List[str]:
         """
@@ -270,21 +458,21 @@ class Management:
         """
         return list(self.tasks.keys())
     
-    def list_crews(self) -> List[str]:
+    def list_teams(self) -> List[str]:
         """
-        List all crew names.
+        List all team names.
         
         Returns:
-            List of crew names
+            List of team names
         """
-        return list(self.crews.keys())
+        return list(self.teams.keys())
     
-    def create_social_media_crew(self) -> str:
+    def create_social_media_team(self) -> str:
         """
-        Create a predefined social media crew with agents and tasks.
+        Create a predefined social media team with agents and tasks.
         
         Returns:
-            The crew ID
+            The team ID
         """
         # Create agents
         content_creator = self.create_agent(
@@ -330,22 +518,22 @@ class Management:
             expected_output="Optimized social media post with posting schedule recommendations"
         )
         
-        # Create the crew
-        crew_name = "social_media_crew"
-        self.create_crew(
-            name=crew_name,
+        # Create the team
+        team_name = "social_media_team"
+        self.create_team(
+            name=team_name,
             task_names=["analyze_trends", "create_content", "optimize_engagement"],
             process="sequential"
         )
         
-        return crew_name
+        return team_name
     
-    def create_content_research_crew(self) -> str:
+    def create_content_research_team(self) -> str:
         """
-        Create a predefined content research crew with agents and tasks.
+        Create a predefined content research team with agents and tasks.
         
         Returns:
-            The crew ID
+            The team ID
         """
         # Create agents
         researcher = self.create_agent(
@@ -391,12 +579,12 @@ class Management:
             expected_output="Final polished article ready for publication"
         )
         
-        # Create the crew
-        crew_name = "content_research_crew"
-        self.create_crew(
-            name=crew_name,
+        # Create the team
+        team_name = "content_research_team"
+        self.create_team(
+            name=team_name,
             task_names=["research_topic", "write_content", "edit_content"],
             process="sequential"
         )
         
-        return crew_name
+        return team_name

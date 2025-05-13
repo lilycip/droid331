@@ -10,7 +10,7 @@ A highly modular and customizable AI agent for social media interaction and cont
 - **Content Generation**: Create text, images, memes, and GIFs
 - **Memory System**: Store and retrieve context, history, and learned information
 - **Task Scheduling**: Prioritize and schedule tasks automatically
-- **Team Management**: Coordinate multiple AI agents using CrewAI
+- **Team Management**: Coordinate multiple AI agents with specialized roles
 - **Extensible Plugin System**: Add new features with minimal code
 
 ## Architecture
@@ -31,7 +31,7 @@ Droid is built with a modular architecture consisting of:
 - **Meme Generator**: Create memes with templates
 - **Influencer Interaction**: Interact with social media influencers
 - **Comment Reply**: Reply to comments on social media
-- **Management**: Coordinate teams of specialized AI agents using CrewAI
+- **Management**: Coordinate teams of specialized AI agents for complex tasks
 
 ## Installation
 
@@ -179,8 +179,8 @@ python examples/custom_plugin.py --plugin-dir plugins --log-file /tmp/droid/even
 # Run with a custom workflow system
 python examples/custom_workflow.py --workflow workflows/social_media_post.json
 
-# Run with the management module (CrewAI)
-python examples/management_example.py --crew-type custom --topic "artificial intelligence" --platform twitter
+# Run with the management module
+python examples/management_example.py --team-type custom --topic "artificial intelligence" --platform twitter
 ```
 
 ## Extending Droid

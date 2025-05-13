@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Example script demonstrating the use of the Management module with CrewAI.
+Example script demonstrating the use of the Management module for team coordination.
 """
 import os
 import sys
@@ -13,6 +13,10 @@ from typing import Dict, Any
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from droid.core.agent import Agent
+from droid.core.model_manager import ModelManager
+from droid.core.memory import MemorySystem
+from droid.modules.management import Management, Tool
+from droid.utils.config_manager import ConfigManager
 from droid.utils.logger import setup_logging
 
 def search_web(query: str) -> str:
@@ -53,50 +57,19 @@ def post_to_social_media(platform: str, content: str, image_path: str = None) ->
     """
     return f"Posted to {platform} with ID: post_12345"
 
-def run_predefined_crew(agent, crew_type: str, inputs: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Run a predefined crew.
+def setup_management_module() -> Management:
+    """Set up the management module with configuration."""
+    # Load configuration
+    config_manager = ConfigManager()
+    config = config_manager.get_config()
     
-    Args:
-        agent: Agent instance
-        crew_type: Type of crew to run
-        inputs: Input parameters for the crew
-        
-    Returns:
-        Results of the crew execution
-    """
-    # Get the management module
-    management = agent.modules.get("management")
-    if not management:
-        raise ValueError("Management module not found")
+    # Initialize model manager and memory system
+    model_manager = ModelManager(config.get("models", {}))
+    memory = MemorySystem(config.get("memory", {}))
     
-    # Create the crew based on the type
-    if crew_type == "social_media":
-        crew_name = management.create_social_media_crew()
-    elif crew_type == "content_research":
-        crew_name = management.create_content_research_crew()
-    else:
-        raise ValueError(f"Unknown crew type: {crew_type}")
-    
-    # Run the crew
-    return management.run_crew(crew_name, inputs)
-
-def run_custom_crew(agent, topic: str, platform: str) -> Dict[str, Any]:
-    """
-    Create and run a custom crew.
-    
-    Args:
-        agent: Agent instance
-        topic: Topic to create content about
-        platform: Social media platform to post to
-        
-    Returns:
-        Results of the crew execution
-    """
-    # Get the management module
-    management = agent.modules.get("management")
-    if not management:
-        raise ValueError("Management module not found")
+    # Initialize management module
+    management_config = config.get("modules", {}).get("management", {})
+    management = Management(management_config, model_manager, memory)
     
     # Register tools
     management.register_tool(
@@ -116,6 +89,47 @@ def run_custom_crew(agent, topic: str, platform: str) -> Dict[str, Any]:
         description="Post content to social media",
         func=post_to_social_media
     )
+    
+    return management
+
+def run_predefined_team(team_type: str, inputs: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Run a predefined team.
+    
+    Args:
+        team_type: Type of team to run
+        inputs: Input parameters for the team
+        
+    Returns:
+        Results of the team execution
+    """
+    # Set up the management module
+    management = setup_management_module()
+    
+    # Create the team based on the type
+    if team_type == "social_media":
+        team_name = management.create_social_media_team()
+    elif team_type == "content_research":
+        team_name = management.create_content_research_team()
+    else:
+        raise ValueError(f"Unknown team type: {team_type}")
+    
+    # Run the team
+    return management.run_team(team_name, inputs)
+
+def run_custom_team(topic: str, platform: str) -> Dict[str, Any]:
+    """
+    Create and run a custom team.
+    
+    Args:
+        topic: Topic to create content about
+        platform: Social media platform to post to
+        
+    Returns:
+        Results of the team execution
+    """
+    # Set up the management module
+    management = setup_management_module()
     
     # Create agents
     management.create_agent(
@@ -161,16 +175,16 @@ def run_custom_crew(agent, topic: str, platform: str) -> Dict[str, Any]:
         expected_output="Post ID and engagement optimization tips"
     )
     
-    # Create the crew
-    crew_name = "custom_content_crew"
-    management.create_crew(
-        name=crew_name,
+    # Create the team
+    team_name = "custom_content_team"
+    management.create_team(
+        name=team_name,
         task_names=["research_topic", "create_content", "post_content"],
         process="sequential"
     )
     
-    # Run the crew
-    return management.run_crew(crew_name, {
+    # Run the team
+    return management.run_team(team_name, {
         "topic": topic,
         "platform": platform
     })
@@ -178,9 +192,8 @@ def run_custom_crew(agent, topic: str, platform: str) -> Dict[str, Any]:
 def main():
     """Run the example."""
     parser = argparse.ArgumentParser(description="Management module example")
-    parser.add_argument("--config", type=str, help="Path to config file")
-    parser.add_argument("--crew-type", type=str, choices=["social_media", "content_research", "custom"],
-                        default="custom", help="Type of crew to run")
+    parser.add_argument("--team-type", type=str, choices=["social_media", "content_research", "custom"],
+                        default="custom", help="Type of team to run")
     parser.add_argument("--topic", type=str, default="artificial intelligence",
                         help="Topic for content creation")
     parser.add_argument("--platform", type=str, default="twitter",
@@ -194,59 +207,25 @@ def main():
     setup_logging({"level": log_level})
     logger = logging.getLogger(__name__)
     
-    # Create a custom config with the management module enabled
-    if not args.config:
-        config = {
-            "modules": {
-                "management": {
-                    "enabled": True,
-                    "process": "sequential"
-                }
-            }
-        }
-        
-        # Create a temporary config file
-        import tempfile
-        import yaml
-        
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            yaml.dump(config, f)
-            config_path = f.name
-    else:
-        config_path = args.config
-    
     try:
-        # Initialize the agent with the management module
-        logger.info("Initializing agent with management module")
-        agent = Agent(config_path=config_path)
-        
-        # Check if the management module was loaded
-        if "management" not in agent.modules:
-            logger.error("Management module was not loaded")
-            sys.exit(1)
-        
-        # Run the appropriate crew
-        if args.crew_type == "custom":
-            logger.info(f"Running custom crew for topic '{args.topic}' on platform '{args.platform}'")
-            result = run_custom_crew(agent, args.topic, args.platform)
+        # Run the appropriate team
+        if args.team_type == "custom":
+            logger.info(f"Running custom team for topic '{args.topic}' on platform '{args.platform}'")
+            result = run_custom_team(args.topic, args.platform)
         else:
-            logger.info(f"Running predefined {args.crew_type} crew")
-            result = run_predefined_crew(agent, args.crew_type, {
+            logger.info(f"Running predefined {args.team_type} team")
+            result = run_predefined_team(args.team_type, {
                 "topic": args.topic,
                 "platform": args.platform
             })
         
         # Print the result
-        logger.info("Crew execution completed")
+        logger.info("Team execution completed")
         print(json.dumps(result, indent=2))
         
-    finally:
-        # Clean up the temporary config file
-        if not args.config and 'config_path' in locals():
-            try:
-                os.unlink(config_path)
-            except:
-                pass
+    except Exception as e:
+        logger.error(f"Error running team: {str(e)}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
