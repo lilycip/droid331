@@ -104,7 +104,9 @@ class Management:
             verbose=verbose,
             allow_delegation=allow_delegation,
             tools=agent_tools if agent_tools else None,
-            llm=llm
+            llm=llm,
+            model_manager=self.model_manager,
+            memory_system=self.memory
         )
         
         self.agents[name] = agent

@@ -64,7 +64,9 @@ class Agent:
         verbose: bool = False,
         allow_delegation: bool = False,
         tools: List[BaseTool] = None,
-        llm: Any = None
+        llm: Any = None,
+        model_manager: Any = None,
+        memory_system: Any = None
     ):
         """
         Initialize an agent.
@@ -77,6 +79,8 @@ class Agent:
             allow_delegation: Whether to allow task delegation
             tools: List of tools available to the agent
             llm: Language model to use for the agent
+            model_manager: Model manager to use for the agent
+            memory_system: Memory system to use for the agent
         """
         self.id = str(uuid.uuid4())
         self.role = role
@@ -86,6 +90,8 @@ class Agent:
         self.allow_delegation = allow_delegation
         self.tools = tools or []
         self.llm = llm
+        self.model_manager = model_manager
+        self.memory_system = memory_system
         self.memory = []
         
     def add_memory(self, content: str) -> None:
@@ -131,6 +137,28 @@ class Agent:
             
         prompt = self.get_prompt(task.description, task.context)
         
+        # First try to use the model manager if available
+        if self.model_manager and hasattr(self.model_manager, 'run_model'):
+            try:
+                # Check if the model manager has a default LLM model
+                if self.model_manager.has_model("llama-3.1"):
+                    response = self.model_manager.run_model("llama-3.1", prompt)
+                    
+                    # Store in memory system if available
+                    if self.memory_system and hasattr(self.memory_system, 'add'):
+                        self.memory_system.add(f"task_result_{task.id}", response)
+                    
+                    self.add_memory(f"Completed task: {task.description}")
+                    
+                    if self.verbose:
+                        logger.info(f"Agent {self.role} completed task using model manager")
+                    
+                    return response
+            except Exception as e:
+                logger.error(f"Error using model manager: {str(e)}")
+                # Fall back to other methods
+        
+        # Fall back to using the LLM directly if available
         if self.llm:
             # Check if the LLM has a generate method
             if hasattr(self.llm, 'generate'):
