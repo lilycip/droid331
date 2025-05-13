@@ -51,17 +51,49 @@ class Agent:
             try:
                 # Dynamic import of the module
                 module_path = module_config.get('path', f"droid.modules.{module_name}")
-                module_class = module_config.get('class', module_name.capitalize())
+                module_class = module_config.get('class', None)
                 
-                module = __import__(module_path, fromlist=[module_class])
-                module_cls = getattr(module, module_class)
+                # If no class is specified, try to infer it from the module name
+                if not module_class:
+                    # Convert snake_case to CamelCase
+                    parts = module_name.split('_')
+                    module_class = ''.join(part.capitalize() for part in parts)
                 
-                # Initialize the module with its configuration
-                self.modules[module_name] = module_cls(
-                    config=module_config,
-                    model_manager=self.model_manager,
-                    memory=self.memory
-                )
+                try:
+                    # Import the module
+                    module = __import__(module_path, fromlist=[module_class])
+                    
+                    # Get the class from the module
+                    module_cls = getattr(module, module_class)
+                    
+                    # Initialize the module with its configuration
+                    self.modules[module_name] = module_cls(
+                        config=module_config,
+                        model_manager=self.model_manager,
+                        memory=self.memory
+                    )
+                except AttributeError:
+                    # Try alternative class name formats
+                    alternative_class_names = [
+                        module_name.capitalize(),  # social_media -> Social_media
+                        ''.join(part.capitalize() for part in module_name.split('_')),  # social_media -> SocialMedia
+                        module_name  # social_media -> social_media
+                    ]
+                    
+                    for class_name in alternative_class_names:
+                        try:
+                            module_cls = getattr(module, class_name)
+                            self.modules[module_name] = module_cls(
+                                config=module_config,
+                                model_manager=self.model_manager,
+                                memory=self.memory
+                            )
+                            break
+                        except AttributeError:
+                            continue
+                    
+                    if module_name not in self.modules:
+                        raise Exception(f"Could not find class for module {module_name}")
                 logger.info(f"Loaded module: {module_name}")
             except Exception as e:
                 logger.error(f"Failed to load module {module_name}: {str(e)}")

@@ -28,7 +28,10 @@ def main():
     
     print("Generating text content...")
     text_result = agent.execute_task("generate_content", text_params)
-    print(f"Generated text: {text_result.get('text', 'Error')}\n")
+    if text_result:
+        print(f"Generated text: {text_result.get('text', 'Error')}\n")
+    else:
+        print("Failed to generate text content\n")
     
     # Generate an image
     image_params = {
@@ -38,7 +41,10 @@ def main():
     
     print("Generating image...")
     image_result = agent.execute_task("generate_content", image_params)
-    print(f"Image result: {json.dumps(image_result, indent=2)}\n")
+    if image_result:
+        print(f"Image result: {json.dumps(image_result, indent=2)}\n")
+    else:
+        print("Failed to generate image content\n")
     
     # Generate a meme
     meme_params = {
@@ -49,7 +55,10 @@ def main():
     
     print("Generating meme...")
     meme_result = agent.execute_task("generate_content", meme_params)
-    print(f"Meme result: {json.dumps(meme_result, indent=2)}")
+    if meme_result:
+        print(f"Meme result: {json.dumps(meme_result, indent=2)}")
+    else:
+        print("Failed to generate meme content")
 
 if __name__ == "__main__":
     main()

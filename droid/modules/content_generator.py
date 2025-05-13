@@ -174,13 +174,95 @@ class ContentGenerator:
             logger.error(f"Error generating image: {str(e)}")
             return {"success": False, "error": str(e)}
     
+    def generate_meme(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Generate a meme.
+        
+        Args:
+            params: Parameters for meme generation
+                - topic: Meme topic
+                - style: Meme style (optional)
+                - template: Meme template (optional)
+                
+        Returns:
+            Generated meme information
+        """
+        topic = params.get("topic", "")
+        style = params.get("style", "funny")
+        template = params.get("template", "default")
+        
+        if not topic:
+            logger.error("No topic provided for meme generation")
+            return {"success": False, "error": "No topic provided"}
+        
+        try:
+            # Generate a text caption for the meme
+            caption_prompt = f"Create a {style} meme caption about {topic}"
+            caption_result = self.generate_text({"prompt": caption_prompt})
+            
+            if not caption_result.get("success", False):
+                logger.error(f"Failed to generate meme caption: {caption_result.get('error', 'Unknown error')}")
+                return {"success": False, "error": f"Failed to generate meme caption: {caption_result.get('error', 'Unknown error')}"}
+            
+            caption = caption_result.get("text", "")
+            
+            # Generate an image for the meme
+            image_prompt = f"A {style} meme about {topic}"
+            image_result = self.generate_image({"prompt": image_prompt})
+            
+            if not image_result.get("success", False):
+                logger.error(f"Failed to generate meme image: {image_result.get('error', 'Unknown error')}")
+                return {"success": False, "error": f"Failed to generate meme image: {image_result.get('error', 'Unknown error')}"}
+            
+            # In a real implementation, you would combine the image and caption here
+            
+            # Save the meme to disk
+            content_id = f"meme_{hash(topic)}_{style}_{template}"
+            filename = f"{content_id}.png"
+            filepath = os.path.join(self.output_dir, "memes", filename)
+            
+            # Ensure the memes directory exists
+            os.makedirs(os.path.join(self.output_dir, "memes"), exist_ok=True)
+            
+            # Store the generated content in memory
+            self.memory.store(
+                category="generated_content",
+                key=content_id,
+                value={
+                    "filepath": filepath,
+                    "topic": topic,
+                    "style": style,
+                    "template": template,
+                    "caption": caption
+                },
+                metadata={
+                    "type": "meme",
+                    "topic": topic,
+                    "style": style,
+                    "template": template
+                }
+            )
+            
+            return {
+                "success": True,
+                "content_id": content_id,
+                "filepath": filepath,
+                "topic": topic,
+                "style": style,
+                "template": template,
+                "caption": caption
+            }
+        except Exception as e:
+            logger.error(f"Error generating meme: {str(e)}")
+            return {"success": False, "error": str(e)}
+    
     def generate_content(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """
         Generate content based on the specified type.
         
         Args:
             params: Parameters for content generation
-                - content_type: Type of content to generate (text, image)
+                - content_type: Type of content to generate (text, image, meme)
                 - prompt: Text prompt
                 - model: Model to use (optional)
                 - additional parameters based on content type
@@ -194,6 +276,8 @@ class ContentGenerator:
             return self.generate_text(params)
         elif content_type == "image":
             return self.generate_image(params)
+        elif content_type == "meme":
+            return self.generate_meme(params)
         else:
             logger.error(f"Unsupported content type: {content_type}")
             return {"success": False, "error": f"Unsupported content type: {content_type}"}
