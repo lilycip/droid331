@@ -136,6 +136,7 @@ The `examples` directory contains sample scripts to help you get started with Dr
 - `custom_model_adapter.py`: Create and use a custom model adapter
 - `custom_logger.py`: Create and use a custom logger
 - `custom_api.py`: Create and use a custom API
+- `custom_plugin.py`: Create and use a custom plugin system
 
 ### Running Examples
 
@@ -168,6 +169,9 @@ python examples/custom_api.py --port 5000 --api-key "your-secret-key"
 
 # Test the custom API
 python examples/test_custom_api.py --url "http://localhost:5000" --api-key "your-secret-key"
+
+# Run with a custom plugin system
+python examples/custom_plugin.py --plugin-dir plugins --log-file /tmp/droid/events.log
 ```
 
 ## Extending Droid
