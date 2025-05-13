@@ -45,7 +45,7 @@ def test_image_generation(model_manager, model_name="stable-diffusion-2.1", outp
         
         try:
             # Run the model
-            result = model_manager.run_model(model_name, prompt, {"output_dir": output_dir})
+            result = model_manager.run_model(model_name, prompt, output_dir=output_dir)
             
             if isinstance(result, dict) and "image_path" in result:
                 logger.info(f"Image generated at: {result['image_path']}")
