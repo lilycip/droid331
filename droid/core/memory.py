@@ -339,6 +339,21 @@ class MemorySystem:
             logger.error(f"Failed to get interactions: {str(e)}")
             return []
     
+    def add(self, item: str, category: str = "general") -> bool:
+        """
+        Add a memory item to the system.
+        This is a simplified interface for the CrewAI Lite integration.
+        
+        Args:
+            item: The memory item to add
+            category: The category to store the item under
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        key = f"memory_{datetime.now().strftime('%Y%m%d%H%M%S%f')}"
+        return self.store(category, key, item)
+    
     def clear_short_term(self):
         """Clear the short-term memory cache."""
         self.short_term = {}
