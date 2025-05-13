@@ -212,11 +212,14 @@ class Management:
         result = crew.kickoff(inputs=inputs)
         
         # Store the result in memory
-        self.memory.add(f"crew_result_{name}", {
-            "crew": name,
-            "result": result,
-            "timestamp": datetime.now().isoformat()
-        })
+        self.memory.add(
+            json.dumps({
+                "crew": name,
+                "result": result,
+                "timestamp": datetime.now().isoformat()
+            }),
+            category=f"crew_result_{name}"
+        )
         
         return {"result": result}
     
