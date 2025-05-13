@@ -32,6 +32,8 @@ setup(
             "droid=main:main",
             "droid-web=web.app:main",
             "droid-cli=run_cli:main",
+            "droid-api=examples.custom_api:main",
+            "droid-test-api=examples.test_custom_api:main",
         ],
     },
     include_package_data=True,
