@@ -69,6 +69,57 @@ Droid is highly configurable through the `config.yaml` file. You can customize:
 
 See the `config/config.yaml` file for a complete example.
 
+## Models
+
+Droid supports multiple AI models for different tasks:
+
+### Llama 3.1
+
+Llama 3.1 is a powerful large language model (LLM) from Meta AI. It's used for text generation, conversation, and reasoning tasks.
+
+To download and set up Llama 3.1:
+
+```bash
+# Download the 8B parameter model
+python scripts/download_llama.py --model-size 8b
+
+# Download the 70B parameter model (requires more memory)
+python scripts/download_llama.py --model-size 70b
+```
+
+### Stable Diffusion
+
+Stable Diffusion is a state-of-the-art text-to-image diffusion model. It's used for generating images from text prompts.
+
+To download and set up Stable Diffusion:
+
+```bash
+# Download Stable Diffusion v1.5
+python scripts/download_stable_diffusion.py --model-type sd
+
+# Download Stable Diffusion XL (higher quality, requires more memory)
+python scripts/download_stable_diffusion.py --model-type sdxl
+```
+
+### Testing Models
+
+You can test the models with the provided test script:
+
+```bash
+# Test all models
+python examples/test_models.py
+
+# Test only LLM models
+python examples/test_models.py --model-type llm
+
+# Test only diffusion models
+python examples/test_models.py --model-type diffusion
+
+# Test a specific model
+python examples/test_models.py --model-name llama-3.1
+python examples/test_models.py --model-name stable-diffusion-xl
+```
+
 ## Usage
 
 ### CLI Mode
