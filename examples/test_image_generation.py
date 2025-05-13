@@ -45,7 +45,15 @@ def test_image_generation(model_manager, model_name="stable-diffusion-2.1", outp
         
         try:
             # Run the model with fewer steps for faster inference
-            result = model_manager.run_model(model_name, prompt, output_dir=output_dir, num_inference_steps=10)
+            prompt_slug = prompt.lower().replace(" ", "_")[:20]
+            filename = f"test_{model_name}_{i+1}_{prompt_slug}.png"
+            result = model_manager.run_model(
+                model_name, 
+                prompt, 
+                output_dir=output_dir, 
+                num_inference_steps=10,
+                filename=filename
+            )
             
             if isinstance(result, dict) and "image_path" in result:
                 logger.info(f"Image generated at: {result['image_path']}")
