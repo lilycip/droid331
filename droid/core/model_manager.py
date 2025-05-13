@@ -151,6 +151,18 @@ class ModelManager:
             logger.error(f"Failed to unload model {model_name}: {str(e)}")
             return False
     
+    def has_model(self, model_name: str) -> bool:
+        """
+        Check if a model is registered.
+        
+        Args:
+            model_name: Name of the model to check
+            
+        Returns:
+            True if the model is registered, False otherwise
+        """
+        return model_name in self.models
+    
     def get_model(self, model_name: str) -> Optional[Any]:
         """
         Get a loaded model instance.
