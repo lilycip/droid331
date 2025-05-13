@@ -1,0 +1,126 @@
+agent:
+  name: Droid
+  version: 0.1.0
+  description: Modular AI Agent for social media and content generation
+
+models:
+  llama-3.1:
+    type: llm
+    path: models/llama-3.1
+    preload: true
+    config:
+      max_tokens: 2048
+      temperature: 0.7
+      top_p: 0.95
+      repetition_penalty: 1.1
+  
+  stable-diffusion-2.1:
+    type: diffusion
+    path: models/stable-diffusion-2.1
+    preload: false
+    config:
+      guidance_scale: 7.5
+      num_inference_steps: 50
+      width: 512
+      height: 512
+  
+  stable-diffusion-xl:
+    type: diffusion
+    path: models/stable-diffusion-xl
+    preload: false
+    config:
+      guidance_scale: 7.5
+      num_inference_steps: 50
+      width: 1024
+      height: 1024
+
+modules:
+  social_media:
+    enabled: true
+    platforms:
+      - twitter
+      - instagram
+      - facebook
+    twitter:
+      api_key: ${TWITTER_API_KEY}
+      api_secret: ${TWITTER_API_SECRET}
+      access_token: ${TWITTER_ACCESS_TOKEN}
+      access_token_secret: ${TWITTER_ACCESS_TOKEN_SECRET}
+    instagram:
+      username: ${INSTAGRAM_USERNAME}
+      password: ${INSTAGRAM_PASSWORD}
+    facebook:
+      access_token: ${FACEBOOK_ACCESS_TOKEN}
+  
+  content_generator:
+    enabled: true
+    default_model: llama-3.1
+    default_image_model: stable-diffusion-xl
+    output_dir: data/generated
+  
+  image_generator:
+    enabled: true
+    default_model: stable-diffusion-xl
+    output_dir: data/generated/images
+  
+  meme_generator:
+    enabled: true
+    templates_path: data/meme_templates
+    output_dir: data/generated/memes
+    default_model: llama-3.1
+  
+  influencer_interaction:
+    enabled: true
+    default_model: llama-3.1
+    platforms:
+      - twitter
+      - instagram
+      - facebook
+  
+  comment_reply:
+    enabled: true
+    default_model: llama-3.1
+    platforms:
+      - twitter
+      - instagram
+      - facebook
+    auto_reply: true
+    reply_interval: 3600  # seconds
+
+memory:
+  path: data/memory
+  short_term_limit: 1000
+
+tasks:
+  scheduled_tasks:
+    - name: post_content
+      params:
+        platform: twitter
+        content_type: text
+      schedule: "0 12 * * *"  # Every day at noon
+      priority: 5
+    
+    - name: interact_with_influencer
+      params:
+        platform: instagram
+        interaction_type: comment
+      schedule: "0 15 * * *"  # Every day at 3 PM
+      priority: 7
+    
+    - name: generate_content
+      params:
+        content_type: meme
+        topic: current_events
+      schedule: "0 9 * * *"  # Every day at 9 AM
+      priority: 3
+
+logging:
+  level: INFO
+  file: logs/droid.log
+  max_bytes: 10485760  # 10 MB
+  backup_count: 5
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+  loggers:
+    droid.core: INFO
+    droid.modules: INFO
