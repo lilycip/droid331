@@ -69,24 +69,24 @@ See the `config/config.yaml` file for a complete example.
 
 ## Usage
 
-### Basic Usage
+### CLI Mode
 
-Run the agent with default settings:
+Run the agent in CLI mode with interactive shell:
 
 ```
-python main.py
+python run_cli.py --interactive
 ```
 
 ### Execute a Specific Task
 
 ```
-python main.py --task post_content --params '{"platform": "twitter", "content": "Hello, world!"}'
+python run_cli.py --task post_content --params '{"platform": "twitter", "content": "Hello, world!"}'
 ```
 
 ### Custom Configuration
 
 ```
-python main.py --config my_config.yaml
+python run_cli.py --config my_config.yaml
 ```
 
 ### Web Interface
