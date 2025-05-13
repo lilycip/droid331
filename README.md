@@ -89,6 +89,26 @@ python main.py --task post_content --params '{"platform": "twitter", "content": 
 python main.py --config my_config.yaml
 ```
 
+### Web Interface
+
+Droid includes a web interface for easy interaction:
+
+```
+python run_web.py
+```
+
+This will start a web server on port 12000 by default. You can access the interface at http://localhost:12000.
+
+Options:
+- `--port PORT`: Specify a custom port (default: 12000)
+- `--host HOST`: Specify the host (default: 0.0.0.0)
+- `--debug`: Run in debug mode
+
+Example:
+```
+python run_web.py --port 8080 --debug
+```
+
 ## Extending Droid
 
 ### Adding a New Module
