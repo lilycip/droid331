@@ -30,6 +30,9 @@ setup(
     entry_points={
         "console_scripts": [
             "droid=main:main",
+            "droid-web=web.app:main",
+            "droid-cli=run_cli:main",
         ],
     },
+    include_package_data=True,
 )
