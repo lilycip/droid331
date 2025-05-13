@@ -10,6 +10,7 @@ A highly modular and customizable AI agent for social media interaction and cont
 - **Content Generation**: Create text, images, memes, and GIFs
 - **Memory System**: Store and retrieve context, history, and learned information
 - **Task Scheduling**: Prioritize and schedule tasks automatically
+- **Team Management**: Coordinate multiple AI agents with specialized roles
 - **Extensible Plugin System**: Add new features with minimal code
 
 ## Architecture
@@ -30,6 +31,7 @@ Droid is built with a modular architecture consisting of:
 - **Meme Generator**: Create memes with templates
 - **Influencer Interaction**: Interact with social media influencers
 - **Comment Reply**: Reply to comments on social media
+- **Management**: Coordinate teams of specialized AI agents for complex tasks using CrewAI Lite
 
 ## Installation
 
@@ -176,6 +178,9 @@ python examples/custom_plugin.py --plugin-dir plugins --log-file /tmp/droid/even
 
 # Run with a custom workflow system
 python examples/custom_workflow.py --workflow workflows/social_media_post.json
+
+# Run with the management module
+python examples/management_example.py --team-type custom --topic "artificial intelligence" --platform twitter
 ```
 
 ## Extending Droid
@@ -197,7 +202,63 @@ python examples/custom_workflow.py --workflow workflows/social_media_post.json
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
+## CrewAI Lite
+
+Droid includes a lightweight implementation of CrewAI called CrewAI Lite, which provides the core functionality of CrewAI without the complex dependencies. This allows you to coordinate multiple AI agents with different roles and goals, enabling complex task execution in a sequential or hierarchical manner.
+
+### Features
+
+- **Agent**: Define specialized AI agents with roles, goals, and backstories
+- **Task**: Create tasks for agents to execute
+- **Crew**: Coordinate multiple agents working together
+- **Tool**: Define custom tools for agents to use
+- **Process**: Choose between sequential or hierarchical execution
+
+### Example
+
+```python
+from droid.modules.management import Management, CustomTool
+from droid.utils.crewai_lite import Agent, Task, Crew, Process
+
+# Create a management module
+management = Management(config, model_manager, memory)
+
+# Register tools
+management.register_tool(
+    name="search_web",
+    description="Search the web for information",
+    func=search_web
+)
+
+# Create agents
+management.create_agent(
+    name="researcher",
+    role="Research Specialist",
+    goal="Find accurate information",
+    tools=["search_web"]
+)
+
+# Create tasks
+management.create_task(
+    name="research_topic",
+    description="Research the topic: AI",
+    agent_name="researcher",
+    expected_output="Research notes"
+)
+
+# Create and run a team
+team_name = "research_team"
+management.create_team(
+    name=team_name,
+    task_names=["research_topic"],
+    process="sequential"
+)
+
+result = management.run_team(team_name, {"topic": "AI"})
+```
+
 ## Acknowledgments
 
 - [Llama 3.1](https://ai.meta.com/llama/) by Meta AI
 - [Stable Diffusion](https://stability.ai/stable-diffusion) by Stability AI
+- [CrewAI](https://github.com/joaomdmoura/crewAI) by João Moura (inspiration for CrewAI Lite)

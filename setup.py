@@ -36,6 +36,7 @@ setup(
             "droid-test-api=examples.test_custom_api:main",
             "droid-plugin=examples.custom_plugin:main",
             "droid-workflow=examples.custom_workflow:main",
+            "droid-management=examples.management_example:main",
         ],
     },
     include_package_data=True,
