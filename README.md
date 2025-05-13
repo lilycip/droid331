@@ -132,6 +132,7 @@ The `examples` directory contains sample scripts to help you get started with Dr
 - `custom_module.py`: Create and use a custom module
 - `custom_config.py`: Create and use a custom configuration
 - `custom_memory.py`: Create and use a custom memory system
+- `custom_scheduler.py`: Create and use a custom task scheduler
 
 ### Running Examples
 
@@ -149,6 +150,9 @@ python examples/custom_module.py --interactive
 
 # Run with a custom memory system
 python examples/custom_memory.py --db-path /tmp/droid/memory.db --interactive
+
+# Run with a custom task scheduler
+python examples/custom_scheduler.py --interactive
 ```
 
 ## Extending Droid
