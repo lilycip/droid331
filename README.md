@@ -118,6 +118,7 @@ Check the `examples` directory for sample scripts:
 - `run_with_llama.py`: Run the agent with Llama 3.1 model
 - `run_with_stable_diffusion.py`: Run the agent with Stable Diffusion model
 - `run_with_all_models.py`: Run the agent with all supported models
+- `run_task.py`: Run a specific task with parameters
 - `test_web_api.py`: Test the web API endpoints
 
 ## Extending Droid
