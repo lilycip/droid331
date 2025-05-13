@@ -137,6 +137,7 @@ The `examples` directory contains sample scripts to help you get started with Dr
 - `custom_logger.py`: Create and use a custom logger
 - `custom_api.py`: Create and use a custom API
 - `custom_plugin.py`: Create and use a custom plugin system
+- `custom_workflow.py`: Create and use a custom workflow system
 
 ### Running Examples
 
@@ -172,6 +173,9 @@ python examples/test_custom_api.py --url "http://localhost:5000" --api-key "your
 
 # Run with a custom plugin system
 python examples/custom_plugin.py --plugin-dir plugins --log-file /tmp/droid/events.log
+
+# Run with a custom workflow system
+python examples/custom_workflow.py --workflow workflows/social_media_post.json
 ```
 
 ## Extending Droid
