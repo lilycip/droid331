@@ -120,6 +120,7 @@ Check the `examples` directory for sample scripts:
 - `run_with_all_models.py`: Run the agent with all supported models
 - `run_with_module.py`: Run the agent with a specific module
 - `run_task.py`: Run a specific task with parameters
+- `custom_module.py`: Create and use a custom module
 - `test_web_api.py`: Test the web API endpoints
 
 ## Extending Droid
