@@ -111,19 +111,45 @@ python run_web.py --port 8080 --debug
 
 ## Examples
 
-Check the `examples` directory for sample scripts:
+The `examples` directory contains sample scripts to help you get started with Droid. These examples demonstrate various features and capabilities of the agent.
+
+### Basic Usage
 
 - `generate_content.py`: Generate text, images, or memes
 - `social_media_post.py`: Post content to social media platforms
+- `run_task.py`: Run a specific task with parameters
+- `test_web_api.py`: Test the web API endpoints
+
+### Model Integration
+
 - `run_with_llama.py`: Run the agent with Llama 3.1 model
 - `run_with_stable_diffusion.py`: Run the agent with Stable Diffusion model
 - `run_with_all_models.py`: Run the agent with all supported models
+
+### Customization
+
 - `run_with_module.py`: Run the agent with a specific module
-- `run_task.py`: Run a specific task with parameters
 - `custom_module.py`: Create and use a custom module
 - `custom_config.py`: Create and use a custom configuration
 - `custom_memory.py`: Create and use a custom memory system
-- `test_web_api.py`: Test the web API endpoints
+
+### Running Examples
+
+To run an example script:
+
+```bash
+# Basic example
+python examples/generate_content.py --prompt "Write a blog post about AI agents" --type text
+
+# Run with a specific model
+python examples/run_with_llama.py --llama_path /path/to/llama/model --interactive
+
+# Run with a custom module
+python examples/custom_module.py --interactive
+
+# Run with a custom memory system
+python examples/custom_memory.py --db-path /tmp/droid/memory.db --interactive
+```
 
 ## Extending Droid
 
