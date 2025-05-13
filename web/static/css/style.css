@@ -1,0 +1,92 @@
+/* Custom styles for the Droid AI Agent web interface */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    margin-bottom: 2rem;
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+.form-label {
+    font-weight: 500;
+}
+
+#text-result {
+    white-space: pre-wrap;
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
+
+#image-result img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn {
+    font-weight: 500;
+    padding: 0.5rem 1.5rem;
+}
+
+footer {
+    margin-top: 2rem;
+}
+
+/* Spinner for loading states */
+.spinner {
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    border: 0.25rem solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #007bff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Custom styles for different content types */
+.content-options {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Temperature slider styling */
+#temperature-value {
+    font-weight: bold;
+    color: #007bff;
+}
+
+/* Result containers */
+#generation-result, #post-result, #interact-result {
+    transition: all 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}

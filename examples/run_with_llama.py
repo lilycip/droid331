@@ -1,0 +1,146 @@
+#!/usr/bin/env python3
+"""
+Run the Droid agent with Llama 3.1 model.
+"""
+import os
+import sys
+import json
+import argparse
+import logging
+from droid.core.agent import Agent
+from droid.utils.logger import setup_logging
+
+def main():
+    """Run the agent with Llama 3.1 model."""
+    parser = argparse.ArgumentParser(description="Run the Droid agent with Llama 3.1 model")
+    parser.add_argument("--model_path", type=str, required=True, help="Path to the Llama 3.1 model")
+    parser.add_argument("--task", type=str, help="Task to execute")
+    parser.add_argument("--params", type=str, help="Parameters for the task (JSON string)")
+    parser.add_argument("--interactive", action="store_true", help="Run in interactive mode")
+    parser.add_argument("--debug", action="store_true", help="Run in debug mode")
+    
+    args = parser.parse_args()
+    
+    # Set up logging
+    log_level = "DEBUG" if args.debug else "INFO"
+    setup_logging({"level": log_level})
+    logger = logging.getLogger(__name__)
+    
+    # Create a custom configuration
+    config = {
+        "agent": {
+            "name": "Droid with Llama 3.1"
+        },
+        "models": {
+            "llama": {
+                "type": "llama",
+                "path": args.model_path,
+                "context_length": 4096,
+                "temperature": 0.7,
+                "top_p": 0.9,
+                "max_tokens": 512
+            }
+        },
+        "modules": {
+            "content_generator": {
+                "enabled": True,
+                "default_model": "llama"
+            },
+            "social_media": {
+                "enabled": True
+            }
+        }
+    }
+    
+    # Create the agent with the custom configuration
+    agent = Agent(config=config)
+    
+    # Execute a specific task
+    if args.task:
+        params = {}
+        if args.params:
+            try:
+                params = json.loads(args.params)
+            except json.JSONDecodeError:
+                logger.error(f"Invalid JSON parameters: {args.params}")
+                sys.exit(1)
+        
+        logger.info(f"Executing task: {args.task}")
+        result = agent.execute_task(args.task, params)
+        print(json.dumps(result, indent=2))
+        return
+    
+    # Run in interactive mode
+    if args.interactive:
+        print("Droid AI Agent with Llama 3.1 - Interactive Mode")
+        print("Type 'exit' to quit")
+        print("Type 'help' for a list of commands")
+        
+        while True:
+            try:
+                command = input("\nDroid> ")
+                
+                if command.lower() == "exit":
+                    break
+                
+                if command.lower() == "help":
+                    print("\nAvailable commands:")
+                    print("  generate <prompt>         - Generate text with Llama 3.1")
+                    print("  task <task_name> <params> - Execute a task")
+                    print("  exit                      - Exit the program")
+                    print("  help                      - Show this help message")
+                    continue
+                
+                if command.lower().startswith("generate "):
+                    prompt = command[9:]
+                    params = {
+                        "content_type": "text",
+                        "prompt": prompt,
+                        "model": "llama"
+                    }
+                    
+                    print(f"Generating text with prompt: {prompt}")
+                    result = agent.execute_task("generate_content", params)
+                    if result and "text" in result:
+                        print(f"\nGenerated text:\n{result['text']}")
+                    else:
+                        print("Error generating text")
+                    continue
+                
+                if command.lower().startswith("task "):
+                    parts = command.split(" ", 2)
+                    if len(parts) < 2:
+                        print("Error: Missing task name")
+                        continue
+                    
+                    task_name = parts[1]
+                    params = {}
+                    
+                    if len(parts) > 2:
+                        try:
+                            params = json.loads(parts[2])
+                        except json.JSONDecodeError:
+                            print(f"Error: Invalid JSON parameters: {parts[2]}")
+                            continue
+                    
+                    print(f"Executing task: {task_name}")
+                    result = agent.execute_task(task_name, params)
+                    print(json.dumps(result, indent=2))
+                    continue
+                
+                print(f"Unknown command: {command}")
+                
+            except KeyboardInterrupt:
+                print("\nExiting...")
+                break
+            except Exception as e:
+                print(f"Error: {str(e)}")
+        
+        return
+    
+    # Run the agent
+    logger.info("Starting the agent")
+    agent.run()
+
+if __name__ == "__main__":
+    main()

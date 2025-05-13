@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Droid AI Agent</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Droid AI Agent</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#content-generation">Content Generation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#social-media">Social Media</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#influencer-interaction">Influencer Interaction</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2 id="content-generation">Content Generation</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="generate-form">
+                            <div class="mb-3">
+                                <label for="content-type" class="form-label">Content Type</label>
+                                <select class="form-select" id="content-type">
+                                    <option value="text">Text</option>
+                                    <option value="image">Image</option>
+                                    <option value="meme">Meme</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="prompt" class="form-label">Prompt</label>
+                                <textarea class="form-control" id="prompt" rows="3" placeholder="Enter your prompt here..."></textarea>
+                            </div>
+                            
+                            <!-- Text options -->
+                            <div id="text-options" class="content-options">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="max-tokens" class="form-label">Max Tokens</label>
+                                            <input type="number" class="form-control" id="max-tokens" value="512">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="temperature" class="form-label">Temperature</label>
+                                            <input type="range" class="form-range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+                                            <div class="text-center" id="temperature-value">0.7</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Image options -->
+                            <div id="image-options" class="content-options" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="width" class="form-label">Width</label>
+                                            <input type="number" class="form-control" id="width" value="512">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="height" class="form-label">Height</label>
+                                            <input type="number" class="form-control" id="height" value="512">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="negative-prompt" class="form-label">Negative Prompt</label>
+                                    <textarea class="form-control" id="negative-prompt" rows="2" placeholder="Enter negative prompt here..."></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- Meme options -->
+                            <div id="meme-options" class="content-options" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="style" class="form-label">Style</label>
+                                            <select class="form-select" id="style">
+                                                <option value="funny">Funny</option>
+                                                <option value="sarcastic">Sarcastic</option>
+                                                <option value="motivational">Motivational</option>
+                                                <option value="educational">Educational</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="template" class="form-label">Template</label>
+                                            <select class="form-select" id="template">
+                                                <option value="default">Default</option>
+                                                <option value="drake">Drake</option>
+                                                <option value="distracted-boyfriend">Distracted Boyfriend</option>
+                                                <option value="change-my-mind">Change My Mind</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Generate</button>
+                        </form>
+                        
+                        <div class="mt-4" id="generation-result" style="display: none;">
+                            <h4>Result</h4>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div id="text-result"></div>
+                                    <div id="image-result" class="text-center"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h2 id="social-media">Social Media</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="post-form">
+                            <div class="mb-3">
+                                <label for="platform" class="form-label">Platform</label>
+                                <select class="form-select" id="platform">
+                                    <option value="twitter">Twitter</option>
+                                    <option value="instagram">Instagram</option>
+                                    <option value="facebook">Facebook</option>
+                                    <option value="linkedin">LinkedIn</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="content" class="form-label">Content</label>
+                                <textarea class="form-control" id="content" rows="3" placeholder="Enter your post content here..."></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="media" class="form-label">Media URLs (optional)</label>
+                                <input type="text" class="form-control" id="media" placeholder="Enter comma-separated media URLs">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-success">Post</button>
+                        </form>
+                        
+                        <div class="mt-4" id="post-result" style="display: none;">
+                            <h4>Result</h4>
+                            <div class="card">
+                                <div class="card-body" id="post-result-content">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h2 id="influencer-interaction">Influencer Interaction</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="interact-form">
+                            <div class="mb-3">
+                                <label for="interact-platform" class="form-label">Platform</label>
+                                <select class="form-select" id="interact-platform">
+                                    <option value="twitter">Twitter</option>
+                                    <option value="instagram">Instagram</option>
+                                    <option value="youtube">YouTube</option>
+                                    <option value="tiktok">TikTok</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="influencer-id" class="form-label">Influencer ID</label>
+                                <input type="text" class="form-control" id="influencer-id" placeholder="Enter influencer ID or username">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="interaction-type" class="form-label">Interaction Type</label>
+                                <select class="form-select" id="interaction-type">
+                                    <option value="follow">Follow</option>
+                                    <option value="like">Like</option>
+                                    <option value="comment">Comment</option>
+                                    <option value="message">Direct Message</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3" id="message-container" style="display: none;">
+                                <label for="message" class="form-label">Message</label>
+                                <textarea class="form-control" id="message" rows="3" placeholder="Enter your message here..."></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-info">Interact</button>
+                        </form>
+                        
+                        <div class="mt-4" id="interact-result" style="display: none;">
+                            <h4>Result</h4>
+                            <div class="card">
+                                <div class="card-body" id="interact-result-content">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white text-center py-3 mt-4">
+        <div class="container">
+            <p>Droid AI Agent &copy; 2025</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
