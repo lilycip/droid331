@@ -1,0 +1,83 @@
+# Management Module Configuration
+
+# Enable or disable the module
+enabled: true
+
+# Process type for CrewAI (sequential or hierarchical)
+process: sequential
+
+# Default agents configuration
+default_agents:
+  researcher:
+    role: "Research Specialist"
+    goal: "Find accurate and relevant information"
+    backstory: "You are a meticulous researcher who leaves no stone unturned."
+    tools:
+      - search_web
+    verbose: true
+    allow_delegation: false
+
+  content_creator:
+    role: "Content Creator"
+    goal: "Create engaging content based on research"
+    backstory: "You are a creative content creator who specializes in creating viral content."
+    tools:
+      - generate_image
+    verbose: true
+    allow_delegation: false
+
+  social_media_manager:
+    role: "Social Media Manager"
+    goal: "Post content to social media and maximize engagement"
+    backstory: "You know exactly how to get people to like, comment, and share content."
+    tools:
+      - post_to_social_media
+    verbose: true
+    allow_delegation: false
+
+# Default tools configuration
+default_tools:
+  search_web:
+    description: "Search the web for information"
+    module: "droid.modules.management"
+    function: "search_web"
+
+  generate_image:
+    description: "Generate an image based on a prompt"
+    module: "droid.modules.management"
+    function: "generate_image"
+
+  post_to_social_media:
+    description: "Post content to social media"
+    module: "droid.modules.management"
+    function: "post_to_social_media"
+
+# Default crews configuration
+default_crews:
+  social_media_crew:
+    description: "Create and post social media content"
+    agents:
+      - trend_analyst
+      - content_creator
+      - engagement_manager
+    tasks:
+      - analyze_trends
+      - create_content
+      - optimize_engagement
+    process: sequential
+    verbose: true
+    memory: true
+
+  content_research_crew:
+    description: "Research and create content"
+    agents:
+      - researcher
+      - writer
+      - editor
+    tasks:
+      - research_topic
+      - write_content
+      - edit_content
+    process: sequential
+    verbose: true
+    memory: true

@@ -4,6 +4,7 @@ python-dotenv>=1.0.0
 schedule>=1.2.0
 requests>=2.28.0
 pillow>=9.0.0
+crewai>=0.28.0
 
 # Database
 # Note: sqlite3 is part of the Python standard library, no need to install separately
