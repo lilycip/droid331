@@ -109,6 +109,16 @@ Example:
 python run_web.py --port 8080 --debug
 ```
 
+## Examples
+
+Check the `examples` directory for sample scripts:
+
+- `generate_content.py`: Generate text, images, or memes
+- `social_media_post.py`: Post content to social media platforms
+- `run_with_llama.py`: Run the agent with Llama 3.1 model
+- `run_with_stable_diffusion.py`: Run the agent with Stable Diffusion model
+- `test_web_api.py`: Test the web API endpoints
+
 ## Extending Droid
 
 ### Adding a New Module
