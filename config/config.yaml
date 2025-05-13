@@ -93,6 +93,10 @@ modules:
     default_model: llama-3.1
     teams_path: data/teams
     tools_path: data/tools
+    crewai_lite:
+      enabled: true
+      verbose: true
+      memory: true
 
 memory:
   path: data/memory

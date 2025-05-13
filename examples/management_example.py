@@ -15,7 +15,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from droid.core.agent import Agent
 from droid.core.model_manager import ModelManager
 from droid.core.memory import MemorySystem
-from droid.modules.management import Management, Tool
+from droid.modules.management import Management, CustomTool
 from droid.utils.config_manager import ConfigManager
 from droid.utils.logger import setup_logging
 
