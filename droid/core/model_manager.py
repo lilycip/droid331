@@ -234,14 +234,11 @@ class ModelManager:
                     return
                 
                 # Determine if we should use a local path or download from HuggingFace
-                if not os.path.exists(model_path):
-                    # Use a pre-trained model from HuggingFace
-                    if "xl" in model_name.lower():
-                        model_id = "stabilityai/stable-diffusion-xl-base-1.0"
-                    else:
-                        model_id = "runwayml/stable-diffusion-v1-5"
+                # Always use HuggingFace models for now
+                if "xl" in model_name.lower():
+                    model_id = "stabilityai/stable-diffusion-xl-base-1.0"
                 else:
-                    model_id = model_path
+                    model_id = "runwayml/stable-diffusion-v1-5"
                 
                 # Load the model
                 logger.info(f"Loading diffusion model {model_name} from {model_id}")
