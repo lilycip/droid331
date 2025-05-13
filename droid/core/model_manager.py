@@ -296,12 +296,14 @@ class ModelManager:
                     import tempfile
                     import os
                     
-                    # Create output directory if it doesn't exist
-                    output_dir = os.path.join("data", "generated", "images")
+                    # Use provided output directory or default
+                    output_dir = kwargs.get("output_dir", os.path.join("data", "generated", "images"))
                     os.makedirs(output_dir, exist_ok=True)
                     
-                    # Save the image
-                    image_path = os.path.join(output_dir, f"{model_name}_{int(time.time())}.png")
+                    # Save the image with a unique filename
+                    timestamp = int(time.time())
+                    filename = kwargs.get("filename", f"{model_name}_{timestamp}.png")
+                    image_path = os.path.join(output_dir, filename)
                     image.save(image_path)
                     
                     return {

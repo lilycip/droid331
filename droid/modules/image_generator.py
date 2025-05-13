@@ -3,6 +3,7 @@ Image Generator Module - Generates images using diffusion models.
 """
 import logging
 import os
+import time
 from typing import Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
@@ -70,7 +71,9 @@ class ImageGenerator:
                 "width": width,
                 "height": height,
                 "guidance_scale": guidance_scale,
-                "num_inference_steps": num_inference_steps
+                "num_inference_steps": num_inference_steps,
+                "output_dir": self.output_dir,
+                "filename": f"generated_{hash(prompt)}_{int(time.time())}.png"
             }
             
             result = self.model_manager.run_model(model_name, prompt, **model_params)
@@ -79,13 +82,11 @@ class ImageGenerator:
                 logger.error(f"Failed to generate image with model {model_name}")
                 return {"success": False, "error": f"Failed to generate image with model {model_name}"}
             
-            # Save the image to disk
+            # Get the image path from the result
             content_id = f"image_{hash(prompt)}"
-            filename = f"{content_id}.png"
-            filepath = os.path.join(self.output_dir, filename)
+            filepath = result.get("image_path", os.path.join(self.output_dir, f"{content_id}.png"))
             
-            # In a real implementation, you would save the image here
-            # For example: result["image_data"].save(filepath)
+            # The image is already saved by the model manager
             
             # Store the generated content in memory
             self.memory.store(

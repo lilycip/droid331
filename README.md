@@ -238,6 +238,12 @@ python examples/test_management_with_models.py --topic "climate change" --debug
 
 # Test image generation with Stable Diffusion
 python examples/test_image_generation.py --model stable-diffusion-2.1 --output-dir ./output
+
+# Enhanced image generation with more options
+python examples/enhanced_image_generation.py --model stable-diffusion-xl --width 768 --height 512 --steps 20
+
+# Batch image generation from a file of prompts
+python examples/enhanced_image_generation.py --model stable-diffusion-xl --prompt-file examples/sample_prompts.txt --output-dir ./batch_output
 ```
 
 ## Extending Droid
@@ -248,6 +254,92 @@ python examples/test_image_generation.py --model stable-diffusion-2.1 --output-d
 2. Implement the module class with required methods
 3. Add the module to your configuration file
 4. The agent will automatically load and use your module
+
+## Image Generation
+
+The `ImageGenerator` module provides a simple interface for generating images using diffusion models:
+
+```python
+from droid.core.model_manager import ModelManager
+from droid.core.memory import MemorySystem
+from droid.modules.image_generator import ImageGenerator
+from droid.utils.config_manager import ConfigManager
+
+# Load configuration
+config_manager = ConfigManager()
+config = config_manager.get_config()
+
+# Initialize components
+model_manager = ModelManager(config.get("models", {}))
+memory = MemorySystem(config.get("memory", {}))
+
+# Initialize image generator
+image_generator = ImageGenerator(
+    config.get("modules", {}).get("image_generator", {}),
+    model_manager,
+    memory
+)
+
+# Generate an image
+result = image_generator.generate({
+    "prompt": "A beautiful landscape with mountains and a lake",
+    "model": "stable-diffusion-xl",
+    "width": 768,
+    "height": 512,
+    "num_inference_steps": 25  # Lower for faster generation
+})
+
+if result["success"]:
+    print(f"Image generated at: {result['filepath']}")
+else:
+    print(f"Error: {result['error']}")
+```
+
+You can customize the output directory and filename when generating images:
+
+```python
+# In ModelManager.run_model():
+result = model_manager.run_model(
+    "stable-diffusion-xl",
+    "A beautiful landscape with mountains and a lake",
+    output_dir="./my_images",
+    filename="landscape.png",
+    num_inference_steps=25
+)
+```
+
+### Enhanced Image Generation Example
+
+The `enhanced_image_generation.py` example provides a more feature-rich interface for generating images:
+
+- Batch processing from a file of prompts
+- Customizable image dimensions
+- Negative prompt support
+- Adjustable inference steps and guidance scale
+- Automatic filename generation with timestamps
+
+Example usage:
+
+```bash
+# Generate a single image with custom parameters
+python examples/enhanced_image_generation.py \
+    --model stable-diffusion-xl \
+    --prompt "A futuristic city with flying cars and neon lights" \
+    --negative-prompt "blurry, distorted, low quality" \
+    --width 768 \
+    --height 512 \
+    --steps 20 \
+    --guidance-scale 7.5 \
+    --output-dir ./output \
+    --prefix "futuristic_city"
+
+# Generate multiple images from a file of prompts
+python examples/enhanced_image_generation.py \
+    --model stable-diffusion-xl \
+    --prompt-file examples/sample_prompts.txt \
+    --output-dir ./batch_output \
+    --steps 15
+```
 
 ### Adding a New Model
 
