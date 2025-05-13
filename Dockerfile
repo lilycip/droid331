@@ -21,6 +21,11 @@ RUN mkdir -p data/memory data/generated data/meme_templates logs
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV DROID_CONFIG=/app/config/config.yaml
+ENV PORT=12000
 
-# Run the agent
-ENTRYPOINT ["python", "main.py"]
+# Expose the port
+EXPOSE 12000
+
+# Run the web interface by default, but allow overriding with CMD
+ENTRYPOINT ["python"]
+CMD ["run_web.py"]

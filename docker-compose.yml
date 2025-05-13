@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  droid:
+    build: .
+    ports:
+      - "12000:12000"
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - PORT=12000
+      - DROID_CONFIG=/app/config/config.yaml
+    restart: unless-stopped
+
+  # Uncomment to run the agent in CLI mode instead of web interface
+  # droid-cli:
+  #   build: .
+  #   command: main.py
+  #   volumes:
+  #     - ./config:/app/config
+  #     - ./data:/app/data
+  #     - ./logs:/app/logs
+  #   environment:
+  #     - DROID_CONFIG=/app/config/config.yaml
+  #   restart: unless-stopped
