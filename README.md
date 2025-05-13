@@ -165,6 +165,9 @@ python examples/custom_logger.py --log-format colored --log-file /tmp/droid/agen
 
 # Run with a custom API
 python examples/custom_api.py --port 5000 --api-key "your-secret-key"
+
+# Test the custom API
+python examples/test_custom_api.py --url "http://localhost:5000" --api-key "your-secret-key"
 ```
 
 ## Extending Droid
