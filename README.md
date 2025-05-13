@@ -235,6 +235,9 @@ python examples/management_example.py --team-type custom --topic "artificial int
 
 # Test management module with AI models
 python examples/test_management_with_models.py --topic "climate change" --debug
+
+# Test image generation with Stable Diffusion
+python examples/test_image_generation.py --model stable-diffusion-2.1 --output-dir ./output
 ```
 
 ## Extending Droid
