@@ -135,6 +135,7 @@ The `examples` directory contains sample scripts to help you get started with Dr
 - `custom_scheduler.py`: Create and use a custom task scheduler
 - `custom_model_adapter.py`: Create and use a custom model adapter
 - `custom_logger.py`: Create and use a custom logger
+- `custom_api.py`: Create and use a custom API
 
 ### Running Examples
 
@@ -161,6 +162,9 @@ python examples/custom_model_adapter.py --interactive
 
 # Run with a custom logger
 python examples/custom_logger.py --log-format colored --log-file /tmp/droid/agent.log
+
+# Run with a custom API
+python examples/custom_api.py --port 5000 --api-key "your-secret-key"
 ```
 
 ## Extending Droid
