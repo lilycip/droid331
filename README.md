@@ -122,6 +122,7 @@ Check the `examples` directory for sample scripts:
 - `run_task.py`: Run a specific task with parameters
 - `custom_module.py`: Create and use a custom module
 - `custom_config.py`: Create and use a custom configuration
+- `custom_memory.py`: Create and use a custom memory system
 - `test_web_api.py`: Test the web API endpoints
 
 ## Extending Droid
