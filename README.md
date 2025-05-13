@@ -232,6 +232,9 @@ python examples/custom_workflow.py --workflow workflows/social_media_post.json
 
 # Run with the management module
 python examples/management_example.py --team-type custom --topic "artificial intelligence" --platform twitter
+
+# Test management module with AI models
+python examples/test_management_with_models.py --topic "climate change" --debug
 ```
 
 ## Extending Droid
